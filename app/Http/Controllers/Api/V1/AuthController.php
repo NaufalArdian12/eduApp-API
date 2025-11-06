@@ -8,25 +8,53 @@ use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash, Password, DB};
+use OpenApi\Annotations as OA;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
 {
-    private function ok($data = null, $meta = null, int $code = 200) {
+
+    private function ok($data = null, $meta = null, int $code = 200)
+    {
         $res = ['ok' => true, 'data' => $data];
-        if (!is_null($meta)) $res['meta'] = $meta;
+        if (!is_null($meta))
+            $res['meta'] = $meta;
         return response()->json($res, $code);
     }
-    private function fail(string $code, string $message, int $http = 400, $details = null) {
+    private function fail(string $code, string $message, int $http = 400, $details = null)
+    {
         $err = ['ok' => false, 'error' => ['code' => $code, 'message' => $message]];
-        if (!is_null($details)) $err['error']['details'] = $details;
+        if (!is_null($details))
+            $err['error']['details'] = $details;
         return response()->json($err, $http);
     }
 
-    public function register(Request $req) {
+    /**
+     * @OA\Post(
+     *   path="/api/v1/auth/register",
+     *   tags={"Auth"},
+     *   summary="Register user",
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       required={"name","email","password","password_confirmation"},
+     *       @OA\Property(property="name", type="string", example="Naufal"),
+     *       @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *       @OA\Property(property="password", type="string", format="password", example="Passw0rd!"),
+     *       @OA\Property(property="password_confirmation", type="string", example="Passw0rd!")
+     *     )
+     *   ),
+     *   @OA\Response(response=201, description="Created")
+     * )
+     * /**
+     */
+    public function register(Request $req)
+    {
+
+
         $val = $req->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email:rfc,dns|unique:users,email',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email:rfc|unique:users,email',
             'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()],
         ]);
         $user = User::create([
@@ -35,15 +63,36 @@ class AuthController extends Controller
             'password' => Hash::make($val['password']),
         ]);
 
-        // (opsional) kirim verifikasi email
-        if (method_exists($user, 'sendEmailVerificationNotification')) {
+        if (env('AUTH_SEND_VERIFY', false) && method_exists($user, 'sendEmailVerificationNotification')) {
             $user->sendEmailVerificationNotification();
         }
+
 
         return $this->ok(['user' => $user], null, 201);
     }
 
-    public function login(Request $req) {
+    /**
+     * @OA\Post(
+     *   path="/api/v1/auth/login",
+     *   tags={"Auth"},
+     *   summary="Login & dapat Bearer token",
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       required={"email","password"},
+     *       @OA\Property(property="email", type="string", example="user@example.com"),
+     *       @OA\Property(property="password", type="string", example="Passw0rd!"),
+     *       @OA\Property(property="device_name", type="string", example="mobile")
+     *     )
+     *   ),
+     *   @OA\Response(response=200, description="OK"),
+     *   @OA\Response(response=401, description="Invalid credentials")
+     * )
+     */
+
+    public function login(Request $req)
+    {
+
         $val = $req->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -55,14 +104,12 @@ class AuthController extends Controller
             return $this->fail('INVALID_CREDENTIALS', 'Email atau password salah', 401);
         }
 
-        // (opsional) wajib email terverifikasi
         if (config('auth.must_verified', false) && is_null($user->email_verified_at)) {
             return $this->fail('EMAIL_NOT_VERIFIED', 'Email belum terverifikasi', 403);
         }
 
-        // buat token (bisa set abilities dan expiry)
-        $abilities = ['*']; // atau granular: ['read', 'write']
-        $expiresAt = now()->addDays(30); // token kadaluarsa 30 hari (mobile)
+        $abilities = ['*'];
+        $expiresAt = now()->addDays(30);
         $token = $user->createToken($val['device_name'] ?? 'mobile', $abilities, $expiresAt);
 
         return $this->ok([
@@ -72,20 +119,45 @@ class AuthController extends Controller
         ]);
     }
 
-    public function me(Request $req) {
+    public function me(Request $req)
+    {
         return $this->ok(['user' => $req->user()]);
     }
 
-    public function logout(Request $req) {
+    /**
+     * @OA\Post(
+     *   path="/api/v1/auth/logout",
+     *   tags={"Auth"},
+     *   summary="Revoke token (logout)",
+     *   security={{"BearerAuth":{}}},
+     *   @OA\Response(response=200, description="OK"),
+     *   @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
+
+    public function logout(Request $req)
+    {
         $req->user()->currentAccessToken()->delete();
         return $this->ok(['message' => 'Logged out']);
     }
 
-    // Rotasi token manual: buat baru, hapus yang lama
-    public function refresh(Request $req) {
+    /**
+     * @OA\Post(
+     *   path="/api/v1/auth/refresh",
+     *   tags={"Auth"},
+     *   summary="Rotate token",
+     *   security={{"BearerAuth":{}}},
+     *   @OA\Response(response=200, description="OK"),
+     *   @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
+
+    public function refresh(Request $req)
+    {
         $user = $req->user();
         $current = $user->currentAccessToken();
-        if (!$current) return $this->fail('NO_TOKEN', 'Tidak ada token aktif', 401);
+        if (!$current)
+            return $this->fail('NO_TOKEN', 'Tidak ada token aktif', 401);
 
         $expiresAt = now()->addDays(30);
         $new = $user->createToken($current->name ?? 'mobile', $current->abilities ?? ['*'], $expiresAt);
@@ -97,7 +169,8 @@ class AuthController extends Controller
         ]);
     }
 
-    public function changePassword(Request $req) {
+    public function changePassword(Request $req)
+    {
         $val = $req->validate([
             'current_password' => 'required',
             'new_password' => ['required', PasswordRule::min(8)->mixedCase()->numbers(), 'confirmed'],
@@ -110,17 +183,17 @@ class AuthController extends Controller
             'password' => Hash::make($val['new_password']),
         ])->save();
 
-        // revoke token lama & paksa re-login
         $user->tokens()->delete();
 
         return $this->ok(['message' => 'Password updated. Please login again.']);
     }
 
-    public function forgotPassword(Request $req) {
+    public function forgotPassword(Request $req)
+    {
         $val = $req->validate(['email' => 'required|email']);
-        // (opsional) hanya untuk email terverifikasi
         $user = User::where('email', $val['email'])->first();
-        if (!$user) return $this->ok(['message' => 'If exists, email sent']); // jangan bocorkan user existence
+        if (!$user)
+            return $this->ok(['message' => 'If exists, email sent']);
         if (config('auth.reset_only_verified', true) && is_null($user->email_verified_at)) {
             return $this->fail('EMAIL_NOT_VERIFIED', 'Akun belum terverifikasi', 403);
         }
@@ -130,7 +203,8 @@ class AuthController extends Controller
             : $this->fail('RESET_FAILED', __($status), 500);
     }
 
-    public function resetPassword(Request $req) {
+    public function resetPassword(Request $req)
+    {
         $val = $req->validate([
             'email' => 'required|email',
             'token' => 'required',
@@ -141,7 +215,7 @@ class AuthController extends Controller
             $val,
             function (User $user) use ($val) {
                 $user->forceFill(['password' => Hash::make($val['password'])])->save();
-                $user->tokens()->delete(); // revoke semua token
+                $user->tokens()->delete();
                 event(new PasswordReset($user));
             }
         );
