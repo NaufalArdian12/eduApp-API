@@ -176,12 +176,14 @@
                 "summary": "Update profile",
                 "operationId": "d682da2fd566e34f597e169ac582ad3f",
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
                                     "name": {
                                         "type": "string",
+                                        "maxLength": 100,
                                         "example": "Naufal Ardian"
                                     }
                                 },

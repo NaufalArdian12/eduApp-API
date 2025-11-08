@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\Request;
 use App\Support\ApiResponse;
 use OpenApi\Annotations as OA;
@@ -39,12 +40,9 @@ class ProfileController extends Controller
      *   @OA\Response(response=422, description="Validation error")
      * )
      */
-    public function update(Request $req)
+    public function update(UpdateProfileRequest $req)
     {
-        $val = $req->validate([
-            // pakai sometimes agar field opsional, tapi kalau dikirim harus valid
-            'name' => ['sometimes', 'string', 'max:100'],
-        ]);
+        $val = $req->validated();
 
         $user = $req->user();
         if (!empty($val)) {

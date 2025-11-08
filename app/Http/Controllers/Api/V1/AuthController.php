@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
@@ -31,14 +36,9 @@ class AuthController extends Controller
      *   @OA\Response(response=201, description="Created")
      * )
      */
-    public function register(Request $req)
+    public function register(RegisterRequest $req)
     {
-        $val = $req->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email:rfc', 'unique:users,email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()],
-        ]);
-
+        $val = $req->validated();
         $user = User::create([
             'name' => $val['name'],
             'email' => $val['email'],
@@ -73,13 +73,9 @@ class AuthController extends Controller
      *   @OA\Response(response=401, description="Invalid credentials")
      * )
      */
-    public function login(Request $req)
+    public function login(LoginRequest $req)
     {
-        $val = $req->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-            'device_name' => ['nullable', 'string', 'max:100'],
-        ]);
+        $val = $req->validated();
 
         $user = User::where('email', $val['email'])->first();
         if (!$user || !Hash::check($val['password'], $user->password)) {
@@ -154,12 +150,9 @@ class AuthController extends Controller
         ]);
     }
 
-    public function changePassword(Request $req)
+    public function changePassword(ChangePasswordRequest $req)
     {
-        $val = $req->validate([
-            'current_password' => ['required'],
-            'new_password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()],
-        ]);
+        $val = $req->validated();
 
         $user = $req->user();
         if (!$user || !Hash::check($val['current_password'], $user->password)) {
@@ -175,9 +168,9 @@ class AuthController extends Controller
         return ApiResponse::ok(['message' => 'Password updated. Please login again.']);
     }
 
-    public function forgotPassword(Request $req)
+    public function forgotPassword(ForgotPasswordRequest $req)
     {
-        $val = $req->validate(['email' => ['required', 'email']]);
+        $val = $req->validated();
 
         $user = User::where('email', $val['email'])->first();
         if (!$user) {
@@ -195,18 +188,15 @@ class AuthController extends Controller
             : ApiResponse::fail('RESET_FAILED', __($status), 500);
     }
 
-    public function resetPassword(Request $req)
+    public function resetPassword(ResetPasswordRequest $req)
     {
-        $val = $req->validate([
-            'email' => ['required', 'email'],
-            'token' => ['required'],
-            'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()],
-        ]);
+        $val = $req->validated();
 
         $status = Password::reset(
             $val,
             function (User $user) use ($val) {
                 $user->forceFill(['password' => Hash::make($val['password'])])->save();
+                
                 $user->tokens()->delete();
                 event(new PasswordReset($user));
             }
