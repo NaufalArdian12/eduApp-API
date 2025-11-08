@@ -4,18 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Support\ApiResponse;
 use OpenApi\Annotations as OA;
 
 class ProfileController extends Controller
 {
-    // helper TANPA anotasi
-    private function ok($data = null, $meta = null, int $code = 200)
-    {
-        $res = ['ok' => true, 'data' => $data];
-        if (!is_null($meta)) $res['meta'] = $meta;
-        return response()->json($res, $code);
-    }
-
     /**
      * @OA\Get(
      *   path="/api/v1/profile",
@@ -27,7 +20,7 @@ class ProfileController extends Controller
      */
     public function show(Request $req)
     {
-        return $this->ok(['user' => $req->user()]);
+        return ApiResponse::ok(['user' => $req->user()]);
     }
 
     /**
@@ -37,8 +30,9 @@ class ProfileController extends Controller
      *   summary="Update profile",
      *   security={{"BearerAuth":{}}},
      *   @OA\RequestBody(
+     *     required=true,
      *     @OA\JsonContent(
-     *       @OA\Property(property="name", type="string", example="Naufal Ardian")
+     *       @OA\Property(property="name", type="string", example="Naufal Ardian", maxLength=100)
      *     )
      *   ),
      *   @OA\Response(response=200, description="OK"),
@@ -48,11 +42,15 @@ class ProfileController extends Controller
     public function update(Request $req)
     {
         $val = $req->validate([
-            'name' => 'sometimes|string|max:100',
+            // pakai sometimes agar field opsional, tapi kalau dikirim harus valid
+            'name' => ['sometimes', 'string', 'max:100'],
         ]);
-        $user = $req->user();
-        $user->fill($val)->save();
 
-        return $this->ok(['user' => $user]);
+        $user = $req->user();
+        if (!empty($val)) {
+            $user->fill($val)->save();
+        }
+
+        return ApiResponse::ok(['user' => $user]);
     }
 }
