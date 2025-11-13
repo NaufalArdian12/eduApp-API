@@ -9,7 +9,7 @@ class UpdateProfileRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true; // route harus pakai auth middleware
+        return true;
     }
 
     protected function prepareForValidation(): void
