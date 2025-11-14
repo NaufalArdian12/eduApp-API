@@ -196,7 +196,7 @@ class AuthController extends Controller
             $val,
             function (User $user) use ($val) {
                 $user->forceFill(['password' => Hash::make($val['password'])])->save();
-                
+
                 $user->tokens()->delete();
                 event(new PasswordReset($user));
             }

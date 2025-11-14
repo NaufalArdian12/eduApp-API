@@ -84,7 +84,6 @@ class OAuthController extends Controller
         });
     }
 
-    // Link akun Google dari halaman Settings (user sudah login manual)
     public function link(Request $req)
     {
         $req->validate(['id_token' => ['required', 'string']]);
