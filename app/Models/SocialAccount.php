@@ -3,7 +3,8 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class SocialAccount extends Model {
-    protected $fillable = ['user_id','provider','provider_id','avatar','raw'];
-    protected $casts = ['raw'=>'array'];
+class SocialAccount extends Model
+{
+    protected $fillable = ['user_id', 'provider', 'provider_id', 'avatar', 'raw'];
+    protected $casts = ['raw' => 'array'];
 }
