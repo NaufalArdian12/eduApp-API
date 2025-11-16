@@ -21,7 +21,7 @@ class TokenController extends Controller
         }
 
         $user = $row->user;
-        $row->delete(); // rotate
+        $row->delete();
 
         $access = $user->createToken('movato-mobile')->plainTextToken;
         $newRefresh = Str::random(64);
