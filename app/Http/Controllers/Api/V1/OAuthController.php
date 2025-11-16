@@ -95,11 +95,6 @@ class OAuthController extends Controller
 
         $user = $req->user();
 
-        // Jika email Google beda dengan email akun, tetap izinkan link (opsi):
-        // kalau mau strict samakan, uncomment baris di bawah:
-        // if ($user->email !== $email) abort(422, 'Email mismatch between account and Google');
-
-        // Cegah satu Google account dilink ke user lain
         $exists = SocialAccount::where('provider', 'google')->where('provider_id', $sub)->first();
         if ($exists && $exists->user_id !== $user->id) {
             return response()->json(['status' => 'fail', 'error' => ['code' => 'LINK_CONFLICT', 'message' => 'This Google account is already linked to another user']], 409);
