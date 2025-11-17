@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\StoreAttemptRequest;
 use App\Models\Attempt;
 use App\Services\AttemptService;
 use App\Support\ApiResponse;
@@ -30,14 +31,62 @@ class AttemptController extends Controller
         return ApiResponse::ok($query->get());
     }
 
-    public function store(Request $request)
+    /**
+     * @OA\Post(
+     *   path="api/v1/attempts",
+     *   summary="Submit jawaban essay untuk dinilai AI",
+     *   tags={"Attempts"},
+     *   security={{"sanctum":{}}},
+     *   @OA\RequestBody(
+     *      required=true,
+     *      @OA\JsonContent(
+     *          required={"quiz_id","answer"},
+     *          @OA\Property(
+     *              property="quiz_id",
+     *              type="integer",
+     *              example=1
+     *          ),
+     *          @OA\Property(
+     *              property="answer",
+     *              type="string",
+     *              example="Saya menjumlahkan pecahan dengan penyebut yang sama, jadi 3/7 + 2/7 = 5/7."
+     *          )
+     *      )
+     *   ),
+     *   @OA\Response(
+     *      response=201,
+     *      description="Attempt tersimpan dan sudah digrading AI",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="status", type="string", example="success"),
+     *          @OA\Property(
+     *              property="data",
+     *              type="object",
+     *              @OA\Property(property="id", type="integer", example=10),
+     *              @OA\Property(property="quiz_id", type="integer", example=1),
+     *              @OA\Property(property="user_id", type="integer", example=1),
+     *              @OA\Property(property="attempt_no", type="integer", example=1),
+     *              @OA\Property(property="status", type="string", example="graded"),
+     *              @OA\Property(property="answer", type="string", example="...jawaban siswa..."),
+     *              @OA\Property(property="label", type="string", example="UNDERSTOOD"),
+     *              @OA\Property(property="ai_score_percent", type="integer", example=95),
+     *              @OA\Property(property="ai_feedback", type="object"),
+     *              @OA\Property(property="ai_model", type="string", example="gpt-4o-mini"),
+     *              @OA\Property(property="created_at", type="string", format="date-time"),
+     *              @OA\Property(property="updated_at", type="string", format="date-time")
+     *          )
+     *      )
+     *   ),
+     *   @OA\Response(
+     *      response=422,
+     *      description="Validasi gagal"
+     *   )
+     * )
+     */
+
+    public function store(StoreAttemptRequest $request)
     {
         $user = $request->user();
-
-        $data = $request->validate([
-            'quiz_id' => ['required', 'integer', 'exists:quizzes,id'],
-            'answer' => ['required', 'string'],
-        ]);
+        $data = $request->validated();
 
         $attempt = $this->attemptService->submitAttempt(
             $user,
