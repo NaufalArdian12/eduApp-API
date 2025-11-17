@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreSubjectRequest;
+use App\Http\Requests\Admin\UpdateSubjectRequest;
 use App\Models\Subject;
 use App\Services\AdminContentService;
 use App\Support\ApiResponse;
@@ -22,16 +24,9 @@ class SubjectController extends Controller
         return ApiResponse::ok($subjects);
     }
 
-    public function store(Request $request)
+    public function store(StoreSubjectRequest $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'is_active' => ['boolean'],
-        ]);
-
-        $subject = $this->service->createSubject($data);
-
+        $subject = $this->service->createSubject($request->validated());
         return ApiResponse::ok($subject, null, 201);
     }
 
@@ -42,19 +37,11 @@ class SubjectController extends Controller
         return ApiResponse::ok($subject);
     }
 
-    public function update(Request $request, Subject $subject)
+    public function update(UpdateSubjectRequest $request, Subject $subject)
     {
-        $data = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
-
-        $subject = $this->service->updateSubject($subject, $data);
-
+        $subject = $this->service->updateSubject($subject, $request->validated());
         return ApiResponse::ok($subject);
     }
-
     public function destroy(Subject $subject)
     {
         $this->service->deleteSubject($subject);
