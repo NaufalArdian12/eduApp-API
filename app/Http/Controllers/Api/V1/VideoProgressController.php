@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\UpsertVideoProgressRequest;
 use App\Services\VideoProgressService;
 use App\Support\ApiResponse;
-use Illuminate\Http\Request;
 
 class VideoProgressController extends Controller
 {
@@ -14,23 +14,19 @@ class VideoProgressController extends Controller
     ) {
     }
 
-    public function storeOrUpdate(Request $request)
+    public function store(UpsertVideoProgressRequest $request)
     {
         $user = $request->user();
-
-        $data = $request->validate([
-            'video_id' => ['required', 'integer', 'exists:videos,id'],
-            'seconds_watched' => ['required', 'integer', 'min:0'],
-            'is_completed' => ['nullable', 'boolean'],
-        ]);
+        $data = $request->validated();
 
         $progress = $this->videoProgressService->updateProgress(
             $user,
             $data['video_id'],
             $data['seconds_watched'],
-            $data['is_completed'] ?? null,
+            $data['is_completed'] ?? false,
         );
 
         return ApiResponse::ok($progress);
     }
+
 }

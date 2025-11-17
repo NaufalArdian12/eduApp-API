@@ -21,28 +21,33 @@ class VideoProgressService
         int $secondsWatched,
         ?bool $isCompleted
     ) {
+        $existing = $this->videoProgress->findForUserAndVideo($user->id, $videoId);
+
+        $isCompletedFlag = $isCompleted ?? false;
+
         $progress = $this->videoProgress->upsert(
             [
                 'user_id' => $user->id,
                 'video_id' => $videoId,
             ],
             [
-                'seconds_watched' => $secondsWatched,
-                'is_completed' => $isCompleted ?? false,
+                'seconds_watched' => max($existing?->seconds_watched ?? 0, $secondsWatched),
+                'is_completed' => $existing?->is_completed || $isCompletedFlag,
                 'last_watched_at' => Carbon::now(),
             ]
         );
 
-        if ($isCompleted && !$progress->wasRecentlyCreated && !$progress->getOriginal('is_completed')) {
+        if ($isCompletedFlag && !($existing?->is_completed)) {
             $this->gamification->rewardActivity(
                 $user,
                 'VIDEO_COMPLETED',
                 'video',
                 $videoId,
-                3
+                3,
             );
         }
 
         return $progress;
     }
+
 }
