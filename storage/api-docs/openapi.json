@@ -12,6 +12,117 @@
         }
     ],
     "paths": {
+        "api/v1/attempts": {
+            "post": {
+                "tags": [
+                    "Attempts"
+                ],
+                "summary": "Submit jawaban essay untuk dinilai AI",
+                "operationId": "a8eb0716e075a7f37d5f546c3247d3b7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quiz_id",
+                                    "answer"
+                                ],
+                                "properties": {
+                                    "quiz_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "answer": {
+                                        "type": "string",
+                                        "example": "Saya menjumlahkan pecahan dengan penyebut yang sama, jadi 3/7 + 2/7 = 5/7."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Attempt tersimpan dan sudah digrading AI",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "quiz_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "attempt_no": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "graded"
+                                                },
+                                                "answer": {
+                                                    "type": "string",
+                                                    "example": "...jawaban siswa..."
+                                                },
+                                                "label": {
+                                                    "type": "string",
+                                                    "example": "UNDERSTOOD"
+                                                },
+                                                "ai_score_percent": {
+                                                    "type": "integer",
+                                                    "example": 95
+                                                },
+                                                "ai_feedback": {
+                                                    "type": "object"
+                                                },
+                                                "ai_model": {
+                                                    "type": "string",
+                                                    "example": "gpt-4o-mini"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/register": {
             "post": {
                 "tags": [
@@ -151,6 +262,87 @@
                 ]
             }
         },
+        "/api/v1/debug/grade": {
+            "post": {
+                "tags": [
+                    "Debug"
+                ],
+                "summary": "Coba AI grading secara manual (debug)",
+                "operationId": "19bae028a5f62419af08d3c7b4545826",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "prompt",
+                                    "canonical_answer",
+                                    "student_answer"
+                                ],
+                                "properties": {
+                                    "prompt": {
+                                        "type": "string",
+                                        "example": "Hitung 12 + 8 dan jelaskan langkahmu."
+                                    },
+                                    "canonical_answer": {
+                                        "type": "string",
+                                        "example": "20"
+                                    },
+                                    "acceptable_answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "20",
+                                            "dua puluh"
+                                        ]
+                                    },
+                                    "eval_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "semantic",
+                                            "exact",
+                                            "numeric"
+                                        ],
+                                        "example": "semantic"
+                                    },
+                                    "student_answer": {
+                                        "type": "string",
+                                        "example": "Saya tahu 12 + 8 = 20 karena 10 + 10 = 20 dan 2 + 8 = 10."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Hasil grading AI",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
         "/api/v1/profile": {
             "get": {
                 "tags": [
@@ -219,8 +411,16 @@
     },
     "tags": [
         {
+            "name": "Attempts",
+            "description": "Attempts"
+        },
+        {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Debug",
+            "description": "Debug"
         },
         {
             "name": "Profile",
