@@ -28,7 +28,6 @@ class AdminContentService
     ) {
     }
 
-    /** ===== SUBJECTS ===== */
     public function listSubjects(): Collection
     {
         return $this->subjects->all();
@@ -49,7 +48,6 @@ class AdminContentService
         $this->subjects->delete($subject);
     }
 
-    /** ===== GRADE LEVELS ===== */
     public function listGradeLevels(?int $subjectId = null): Collection
     {
         return $this->gradeLevels->all($subjectId);
@@ -70,7 +68,6 @@ class AdminContentService
         $this->gradeLevels->delete($gradeLevel);
     }
 
-    /** ===== TOPICS ===== */
     public function listTopics(?int $gradeLevelId = null): Collection
     {
         return $this->topics->all($gradeLevelId);
@@ -91,7 +88,6 @@ class AdminContentService
         $this->topics->delete($topic);
     }
 
-    /** ===== VIDEOS ===== */
     public function listVideos(?int $topicId = null): Collection
     {
         return $this->videos->all($topicId);
@@ -112,7 +108,6 @@ class AdminContentService
         $this->videos->delete($video);
     }
 
-    /** ===== QUIZZES ===== */
     public function listQuizzes(?int $topicId = null): Collection
     {
         return $this->quizzes->all($topicId);

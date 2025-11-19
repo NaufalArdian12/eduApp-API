@@ -23,7 +23,6 @@ class GamificationService
         ?int $refId,
         int $points
     ): void {
-        // log
         $this->activityLogs->log(
             $user->id,
             $action,
@@ -32,12 +31,10 @@ class GamificationService
             $points,
         );
 
-        // update poin
         if ($points > 0) {
             $this->pointsRepo->addPoints($user->id, $points);
         }
 
-        // update streak
         $this->streakRepo->touchActivity($user->id);
     }
 

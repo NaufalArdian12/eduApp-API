@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\UserPointController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\UserStreakController;
 use App\Http\Controllers\Api\V1\Admin\RubricController;
@@ -21,7 +22,7 @@ use App\Http\Controllers\Api\V1\Admin\TopicController as AdminTopicController;
 use App\Http\Controllers\Api\V1\Admin\VideoController as AdminVideoController;
 use App\Http\Controllers\Api\V1\Admin\QuizController as AdminQuizController;
 
-Route::prefix('V1')->group(function () {
+Route::prefix('v1')->group(function () {
     Route::post('debug/grade', [DebugAiController::class, 'gradeSample']);
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
@@ -44,10 +45,6 @@ Route::prefix('V1')->group(function () {
         Route::post('attempts', [AttemptController::class, 'store']);
         Route::get('attempts/{attempt}', [AttemptController::class, 'show']);
 
-        Route::get('attempts', [AttemptController::class, 'index']);
-        Route::post('attempts', [AttemptController::class, 'store']);
-        Route::get('attempts/{attempt}', [AttemptController::class, 'show']);
-
         Route::post('video-progress', [VideoProgressController::class, 'storeOrUpdate']);
 
         Route::get('me/stats', [UserStatsController::class, 'show']);
@@ -55,10 +52,12 @@ Route::prefix('V1')->group(function () {
         Route::post('/auth/logout', [TokenController::class, 'logout']);
         Route::get('/streak', [UserStreakController::class, 'show']);
 
+        Route::get('points', [UserPointController::class, 'show']);
+
     });
 });
 
-Route::prefix('V1/admin')
+Route::prefix('v1/admin')
     ->middleware(['auth:sanctum', 'admin'])
     ->group(function () {
         Route::apiResource('subjects', AdminSubjectController::class);
