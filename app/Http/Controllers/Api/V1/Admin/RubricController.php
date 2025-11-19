@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreRubricRequest;
+use App\Http\Requests\Admin\UpdateRubricRequest;
 use App\Models\Rubric;
 use App\Services\AdminContentService;
 use App\Support\ApiResponse;
@@ -22,13 +24,9 @@ class RubricController extends Controller
         );
     }
 
-    public function store(Request $request)
+    public function store(StoreRubricRequest $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string'],
-            'description' => ['nullable', 'string'],
-            'thresholds_json' => ['nullable', 'array'],
-        ]);
+        $data = $request->validated();
 
         $rubric = $this->service->createRubric($data);
 
@@ -40,13 +38,9 @@ class RubricController extends Controller
         return ApiResponse::ok($rubric);
     }
 
-    public function update(Request $request, Rubric $rubric)
+    public function update(UpdateRubricRequest $request, Rubric $rubric)
     {
-        $data = $request->validate([
-            'name' => ['sometimes', 'string'],
-            'description' => ['sometimes', 'string', 'nullable'],
-            'thresholds_json' => ['sometimes', 'array', 'nullable'],
-        ]);
+        $data = $request->validated();
 
         $rubric = $this->service->updateRubric($rubric, $data);
 
