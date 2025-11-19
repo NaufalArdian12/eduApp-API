@@ -11,7 +11,9 @@ class GradeLevelController extends Controller
 {
     public function index(Request $request)
     {
-        $query = GradeLevel::with('subject')
+        $query = GradeLevel::query()
+            ->with('subject')
+            ->where('is_active', true)
             ->orderBy('subject_id')
             ->orderBy('order_index');
 
@@ -19,51 +21,26 @@ class GradeLevelController extends Controller
             $query->where('subject_id', $request->subject_id);
         }
 
+        // if ($user = $request->user()) {
+        //     $query->where('grade_no', $user->grade_no);
+        // }
+
         return ApiResponse::ok($query->get());
-    }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'subject_id' => ['required', 'exists:subjects,id'],
-            'grade_no' => ['required', 'integer', 'min:1', 'max:12'],
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'order_index' => ['nullable', 'integer'],
-            'is_active' => ['boolean'],
-        ]);
-
-        $gradeLevel = GradeLevel::create($data);
-
-        return ApiResponse::ok($gradeLevel, null, 201);
     }
 
     public function show(GradeLevel $gradeLevel)
     {
+        // Jangan tampilkan yg non-active ke student
+        if (! $gradeLevel->is_active) {
+            return ApiResponse::fail(
+                'NOT_FOUND',
+                'Grade level is not available.',
+                404
+            );
+        }
+
         $gradeLevel->load(['subject', 'topics']);
 
         return ApiResponse::ok($gradeLevel);
-    }
-
-    public function update(Request $request, GradeLevel $gradeLevel)
-    {
-        $data = $request->validate([
-            'grade_no' => ['sometimes', 'integer', 'min:1', 'max:12'],
-            'name' => ['sometimes', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'order_index' => ['sometimes', 'nullable', 'integer'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
-
-        $gradeLevel->update($data);
-
-        return ApiResponse::ok($gradeLevel);
-    }
-
-    public function destroy(GradeLevel $gradeLevel)
-    {
-        $gradeLevel->delete();
-
-        return ApiResponse::ok(null, null, 204);
     }
 }
