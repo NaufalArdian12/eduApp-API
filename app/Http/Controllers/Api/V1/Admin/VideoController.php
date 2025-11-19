@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreVideoRequest;
+use App\Http\Requests\Admin\UpdateVideoRequest;
 use App\Models\Video;
 use App\Services\AdminContentService;
 use App\Support\ApiResponse;
@@ -26,17 +28,9 @@ class VideoController extends Controller
         return ApiResponse::ok($videos);
     }
 
-    public function store(Request $request)
+    public function store(StoreVideoRequest $request)
     {
-        $data = $request->validate([
-            'topic_id' => ['required', 'exists:topics,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'youtube_id' => ['required', 'string', 'max:255'],
-            'youtube_url' => ['required', 'url'],
-            'duration_seconds' => ['nullable', 'integer', 'min:0'],
-            'order_index' => ['nullable', 'integer'],
-            'is_active' => ['boolean'],
-        ]);
+        $data = $request->validated();
 
         $video = $this->service->createVideo($data);
 
@@ -50,16 +44,9 @@ class VideoController extends Controller
         return ApiResponse::ok($video);
     }
 
-    public function update(Request $request, Video $video)
+    public function update(UpdateVideoRequest $request, Video $video)
     {
-        $data = $request->validate([
-            'title' => ['sometimes', 'string', 'max:255'],
-            'youtube_id' => ['sometimes', 'string', 'max:255'],
-            'youtube_url' => ['sometimes', 'url'],
-            'duration_seconds' => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'order_index' => ['sometimes', 'nullable', 'integer'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $data = $request->validated();
 
         $video = $this->service->updateVideo($video, $data);
 
