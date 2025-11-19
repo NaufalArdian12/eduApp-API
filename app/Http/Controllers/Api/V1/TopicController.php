@@ -11,7 +11,14 @@ class TopicController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Topic::with(['gradeLevel.subject'])
+        $query = Topic::query()
+            ->with(['gradeLevel.subject'])
+            ->whereHas('gradeLevel', function ($q) {
+                $q->where('is_active', true)
+                  ->whereHas('subject', function ($q2) {
+                      $q2->where('is_active', true);
+                  });
+            })
             ->orderBy('grade_level_id')
             ->orderBy('order_index');
 
@@ -22,48 +29,25 @@ class TopicController extends Controller
         return ApiResponse::ok($query->get());
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'grade_level_id' => ['required', 'exists:grade_levels,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'order_index' => ['nullable', 'integer'],
-            'min_videos_before_assessment' => ['nullable', 'integer', 'min:0'],
-            'is_assessment_enabled' => ['boolean'],
-        ]);
-
-        $topic = Topic::create($data);
-
-        return ApiResponse::ok($topic, null, 201);
-    }
-
     public function show(Topic $topic)
     {
-        $topic->load(['gradeLevel.subject', 'videos', 'quizzes']);
-
-        return ApiResponse::ok($topic);
-    }
-
-    public function update(Request $request, Topic $topic)
-    {
-        $data = $request->validate([
-            'title' => ['sometimes', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'order_index' => ['sometimes', 'nullable', 'integer'],
-            'min_videos_before_assessment' => ['sometimes', 'integer', 'min:0'],
-            'is_assessment_enabled' => ['sometimes', 'boolean'],
+        $topic->load([
+            'gradeLevel.subject',
+            'videos',
+            'quizzes' => function ($q) {
+                $q->where('is_active', true)
+                  ->orderBy('order_index');
+            },
         ]);
 
-        $topic->update($data);
+        if (! $topic->gradeLevel?->is_active || ! $topic->gradeLevel?->subject?->is_active) {
+            return ApiResponse::fail(
+                'NOT_FOUND',
+                'Topic is not available.',
+                404
+            );
+        }
 
         return ApiResponse::ok($topic);
-    }
-
-    public function destroy(Topic $topic)
-    {
-        $topic->delete();
-
-        return ApiResponse::ok(null, null, 204);
     }
 }

@@ -14,7 +14,7 @@ class VideoProgressController extends Controller
     ) {
     }
 
-    public function store(UpsertVideoProgressRequest $request)
+    public function storeOrUpdate(UpsertVideoProgressRequest $request)
     {
         $user = $request->user();
         $data = $request->validated();

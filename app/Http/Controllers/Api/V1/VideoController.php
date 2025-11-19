@@ -11,7 +11,17 @@ class VideoController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Video::with('topic')
+        $query = Video::query()
+            ->with(['topic.gradeLevel.subject'])
+            ->where('is_active', true)
+            ->whereHas('topic', function ($q) {
+                $q->whereHas('gradeLevel', function ($q2) {
+                    $q2->where('is_active', true)
+                        ->whereHas('subject', function ($q3) {
+                            $q3->where('is_active', true);
+                        });
+                });
+            })
             ->orderBy('topic_id')
             ->orderBy('order_index');
 
@@ -19,53 +29,35 @@ class VideoController extends Controller
             $query->where('topic_id', $request->topic_id);
         }
 
-        return ApiResponse::ok($query->get());
-    }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'topic_id' => ['required', 'exists:topics,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'youtube_id' => ['required', 'string', 'max:255'],
-            'youtube_url' => ['required', 'url'],
-            'duration_seconds' => ['nullable', 'integer', 'min:0'],
-            'order_index' => ['nullable', 'integer'],
-            'is_active' => ['boolean'],
+        $videos = $query->get()->makeHidden([
+            'created_at',
+            'updated_at',
         ]);
 
-        $video = Video::create($data);
-
-        return ApiResponse::ok($video, null, 201);
+        return ApiResponse::ok($videos);
     }
 
     public function show(Video $video)
     {
-        $video->load('topic');
+        $video->load(['topic.gradeLevel.subject']);
 
-        return ApiResponse::ok($video);
-    }
+        if (
+            ! $video->is_active ||
+            ! $video->topic?->gradeLevel?->is_active ||
+            ! $video->topic?->gradeLevel?->subject?->is_active
+        ) {
+            return ApiResponse::fail(
+                'NOT_FOUND',
+                'Video is not available.',
+                404
+            );
+        }
 
-    public function update(Request $request, Video $video)
-    {
-        $data = $request->validate([
-            'title' => ['sometimes', 'string', 'max:255'],
-            'youtube_id' => ['sometimes', 'string', 'max:255'],
-            'youtube_url' => ['sometimes', 'url'],
-            'duration_seconds' => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'order_index' => ['sometimes', 'nullable', 'integer'],
-            'is_active' => ['sometimes', 'boolean'],
+        $video->makeHidden([
+            'created_at',
+            'updated_at',
         ]);
 
-        $video->update($data);
-
         return ApiResponse::ok($video);
-    }
-
-    public function destroy(Video $video)
-    {
-        $video->delete();
-
-        return ApiResponse::ok(null, null, 204);
     }
 }
