@@ -8,10 +8,7 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 class ChangePasswordRequest extends FormRequest
 {
 
-    public function authorize(): bool
-    {
-        return true;
-    }
+
     public function stopOnFirstFailure(): bool
     {
         return true;
