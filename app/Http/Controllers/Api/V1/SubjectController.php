@@ -5,56 +5,36 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Subject;
 use App\Support\ApiResponse;
-use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
     public function index()
     {
         $subjects = Subject::query()
+            ->where('is_active', true)
             ->orderBy('id')
             ->get();
 
         return ApiResponse::ok($subjects);
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'is_active'   => ['boolean'],
-        ]);
-
-        $subject = Subject::create($data);
-
-        return ApiResponse::ok($subject, null, 201);
-    }
-
     public function show(Subject $subject)
     {
-        $subject->load('gradeLevels');
+        if (!$subject->is_active) {
+            return ApiResponse::fail(
+                'NOT_FOUND',
+                'Subject is not available.',
+                404
+            );
+        }
 
-        return ApiResponse::ok($subject);
-    }
-
-    public function update(Request $request, Subject $subject)
-    {
-        $data = $request->validate([
-            'name'        => ['sometimes', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'is_active'   => ['sometimes', 'boolean'],
+        $subject->load([
+            'gradeLevels' => function ($q) {
+                $q->where('is_active', true)
+                    ->orderBy('order_index');
+            },
         ]);
 
-        $subject->update($data);
-
         return ApiResponse::ok($subject);
-    }
-
-    public function destroy(Subject $subject)
-    {
-        $subject->delete();
-
-        return ApiResponse::ok(null, null, 204);
     }
 }
