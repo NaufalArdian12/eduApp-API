@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreGradeLevelRequest;
+use App\Http\Requests\Admin\UpdateGradeLevelRequest;
 use App\Models\GradeLevel;
 use App\Services\AdminContentService;
 use App\Support\ApiResponse;
@@ -26,16 +28,9 @@ class GradeLevelController extends Controller
         return ApiResponse::ok($gradeLevels);
     }
 
-    public function store(Request $request)
+    public function store(StoreGradeLevelRequest $request)
     {
-        $data = $request->validate([
-            'subject_id' => ['required', 'exists:subjects,id'],
-            'grade_no' => ['required', 'integer', 'min:1', 'max:12'],
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'order_index' => ['nullable', 'integer'],
-            'is_active' => ['boolean'],
-        ]);
+        $data = $request->validated();
 
         $gradeLevel = $this->service->createGradeLevel($data);
 
@@ -49,15 +44,9 @@ class GradeLevelController extends Controller
         return ApiResponse::ok($gradeLevel);
     }
 
-    public function update(Request $request, GradeLevel $gradeLevel)
+    public function update(UpdateGradeLevelRequest $request, GradeLevel $gradeLevel)
     {
-        $data = $request->validate([
-            'grade_no' => ['sometimes', 'integer', 'min:1', 'max:12'],
-            'name' => ['sometimes', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'order_index' => ['sometimes', 'nullable', 'integer'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $data = $request->validated();
 
         $gradeLevel = $this->service->updateGradeLevel($gradeLevel, $data);
 
@@ -68,6 +57,8 @@ class GradeLevelController extends Controller
     {
         $this->service->deleteGradeLevel($gradeLevel);
 
-        return ApiResponse::ok(null, null, 204);
+        return ApiResponse::ok([
+            'message' => 'Grade level berhasil dihapus.'
+        ], null, 200);
     }
 }
