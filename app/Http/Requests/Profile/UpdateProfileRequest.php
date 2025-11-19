@@ -2,35 +2,28 @@
 
 namespace App\Http\Requests\Profile;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
 
-class UpdateProfileRequest extends FormRequest
+class UpdateProfileRequest extends ApiFormRequest
 {
-
-
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'name' => is_string($this->name) ? trim($this->name) : $this->name,
-            'email' => is_string($this->email) ? strtolower(trim($this->email)) : $this->email,
-        ]);
-    }
-
     public function rules(): array
     {
-        $userId = $this->user()?->id;
-
         return [
-            'name'  => ['sometimes','string','max:100'],
+            'name' => ['sometimes', 'string', 'max:100'],
+            'avatar_url' => ['sometimes', 'nullable', 'url'],
+            'grade_level_id' => ['sometimes', 'nullable', 'exists:grade_levels,id'],
         ];
     }
 
-    public function attributes(): array
+    public function messages(): array
     {
         return [
-            'name' => 'nama',
-            'email' => 'email',
+            'name.string' => 'The name must be a valid text.',
+            'name.max' => 'The name may not be greater than 100 characters.',
+
+            'avatar_url.url' => 'The avatar URL must be a valid URL.',
+
+            'grade_level_id.exists' => 'The selected grade level is invalid.',
         ];
     }
 }

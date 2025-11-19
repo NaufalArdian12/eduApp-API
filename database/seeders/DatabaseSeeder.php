@@ -12,5 +12,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             MovatoDemoSeeder::class,
         ]);
+        $this->call(StudentProfileSeeder::class);
+
     }
 }

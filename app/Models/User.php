@@ -70,4 +70,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserPoint::class);
     }
+
+    public function studentProfile()
+    {
+        return $this->hasOne(StudentProfile::class);
+    }
+
 }

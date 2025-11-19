@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Kalau kamu punya field role / is_admin, bisa tambahin di sini
         // User::updateOrCreate(
         //     ['email' => 'admin@example.com'],
         //     [

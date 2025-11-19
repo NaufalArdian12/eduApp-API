@@ -13,7 +13,6 @@ class MovatoDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. SUBJECT
         $subject = Subject::updateOrCreate(
             ['name' => 'Mathematics'],
             [
@@ -22,7 +21,6 @@ class MovatoDemoSeeder extends Seeder
             ]
         );
 
-        // 2. GRADE LEVEL
         $gradeLevel = GradeLevel::updateOrCreate(
             [
                 'subject_id' => $subject->id,
@@ -36,7 +34,6 @@ class MovatoDemoSeeder extends Seeder
             ]
         );
 
-        // 3. TOPIC
         $topic = Topic::updateOrCreate(
             [
                 'grade_level_id' => $gradeLevel->id,
@@ -50,14 +47,13 @@ class MovatoDemoSeeder extends Seeder
             ]
         );
 
-        // 4. VIDEO
         $video = Video::updateOrCreate(
             [
                 'topic_id' => $topic->id,
                 'title' => 'Addition with Objects',
             ],
             [
-                'youtube_id' => 'dQw4w9WgXcQ', // ganti kalau mau serius 😆
+                'youtube_id' => 'dQw4w9WgXcQ',
                 'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 'duration_seconds' => 180,
                 'order_index' => 1,
@@ -65,7 +61,6 @@ class MovatoDemoSeeder extends Seeder
             ]
         );
 
-        // 5. QUIZ
         Quiz::updateOrCreate(
             [
                 'topic_id' => $topic->id,

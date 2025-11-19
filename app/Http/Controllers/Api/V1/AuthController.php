@@ -93,7 +93,6 @@ class AuthController extends Controller
         return ApiResponse::ok([
             'token' => $token->plainTextToken,
             'token_expires_at' => $expiresAt->toIso8601String(),
-            'user' => $user,
         ]);
     }
 

@@ -50,5 +50,4 @@ use OpenApi\Annotations as OA;
  */
 class Schemas
 {
-    // kosong, cuma buat nempel annotation
 }

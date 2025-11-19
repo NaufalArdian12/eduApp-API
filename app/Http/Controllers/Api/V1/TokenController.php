@@ -61,7 +61,6 @@ class TokenController extends Controller
     {
         $request->user()->currentAccessToken()?->delete();
 
-        // 204 tanpa body → paling clean
         return response()->noContent();
     }
 }

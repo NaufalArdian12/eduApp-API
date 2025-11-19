@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\UserPointController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\UserStreakController;
@@ -51,6 +52,9 @@ Route::prefix('v1')->group(function () {
         Route::get('me/activity-logs', [UserStatsController::class, 'activityLogs']);
         Route::post('/auth/logout', [TokenController::class, 'logout']);
         Route::get('/streak', [UserStreakController::class, 'show']);
+
+        Route::get('profile', [ProfileController::class,'show']);
+        Route::put('profile', [ProfileController::class,'update']);
 
         Route::get('points', [UserPointController::class, 'show']);
 

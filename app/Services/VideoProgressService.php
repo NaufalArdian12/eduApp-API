@@ -38,7 +38,6 @@ class VideoProgressService
             ]
         );
 
-        // Reward hanya ketika baru pertama kali completed
         if ($isCompletedFlag && !$alreadyCompleted) {
             $this->gamification->rewardActivity(
                 $user,

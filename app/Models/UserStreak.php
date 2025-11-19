@@ -26,7 +26,6 @@ class UserStreak extends Model
         'last_active_date',
     ];
 
-    // pakai datetime biar jelas Carbon
     protected $casts = [
         'last_active_date' => 'datetime:Y-m-d',
     ];
