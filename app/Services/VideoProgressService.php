@@ -24,6 +24,7 @@ class VideoProgressService
         $existing = $this->videoProgress->findForUserAndVideo($user->id, $videoId);
 
         $isCompletedFlag = $isCompleted ?? false;
+        $alreadyCompleted = (bool) ($existing?->is_completed);
 
         $progress = $this->videoProgress->upsert(
             [
@@ -32,12 +33,13 @@ class VideoProgressService
             ],
             [
                 'seconds_watched' => max($existing?->seconds_watched ?? 0, $secondsWatched),
-                'is_completed' => $existing?->is_completed || $isCompletedFlag,
+                'is_completed' => $alreadyCompleted || $isCompletedFlag,
                 'last_watched_at' => Carbon::now(),
             ]
         );
 
-        if ($isCompletedFlag && !($existing?->is_completed)) {
+        // Reward hanya ketika baru pertama kali completed
+        if ($isCompletedFlag && !$alreadyCompleted) {
             $this->gamification->rewardActivity(
                 $user,
                 'VIDEO_COMPLETED',
@@ -49,5 +51,4 @@ class VideoProgressService
 
         return $progress;
     }
-
 }
