@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreTopicRequest;
 use App\Models\Topic;
 use App\Services\AdminContentService;
 use App\Support\ApiResponse;
@@ -26,16 +27,9 @@ class TopicController extends Controller
         return ApiResponse::ok($topics);
     }
 
-    public function store(Request $request)
+    public function store(StoreTopicRequest $request)
     {
-        $data = $request->validate([
-            'grade_level_id' => ['required', 'exists:grade_levels,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'order_index' => ['nullable', 'integer'],
-            'min_videos_before_assessment' => ['nullable', 'integer', 'min:0'],
-            'is_assessment_enabled' => ['boolean'],
-        ]);
+        $data = $request->validated();
 
         $topic = $this->service->createTopic($data);
 

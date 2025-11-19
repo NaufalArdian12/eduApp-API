@@ -2,21 +2,24 @@
 
 namespace App\Http\Requests\Admin;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
 
-class UpdateSubjectRequest extends FormRequest
+class UpdateSubjectRequest extends ApiFormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
             'is_active' => ['sometimes', 'boolean'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.max' => 'Nama mata pelajaran maksimal 255 karakter.',
+            'is_active.boolean' => 'Status aktif harus berupa boolean.',
         ];
     }
 }
