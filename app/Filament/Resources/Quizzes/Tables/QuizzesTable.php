@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Filament\Resources\Quizzes\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class QuizzesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('topic.title')
+                    ->searchable(),
+                TextColumn::make('title')
+                    ->searchable(),
+                TextColumn::make('numeric_tolerance')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('eval_type')
+                    ->searchable(),
+                TextColumn::make('rubric.name')
+                    ->searchable(),
+                TextColumn::make('order_index')
+                    ->numeric()
+                    ->sortable(),
+                IconColumn::make('is_active')
+                    ->boolean(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}
