@@ -30,7 +30,6 @@ class GradeLevelController extends Controller
 
     public function show(GradeLevel $gradeLevel)
     {
-        // Jangan tampilkan yg non-active ke student
         if (! $gradeLevel->is_active) {
             return ApiResponse::fail(
                 'NOT_FOUND',
@@ -39,7 +38,7 @@ class GradeLevelController extends Controller
             );
         }
 
-        $gradeLevel->load(['subject', 'topics']);
+        $gradeLevel->load(['subject ', 'topics']);
 
         return ApiResponse::ok($gradeLevel);
     }

@@ -1,10 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\UserPointController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\UserStreakController;
-use App\Http\Controllers\Api\V1\Admin\RubricController;
 use App\Http\Controllers\Api\V1\DebugAiController;
 use App\Http\Controllers\Api\V1\UserStatsController;
 use App\Http\Controllers\Api\V1\OAuthController;
@@ -17,6 +16,7 @@ use App\Http\Controllers\Api\V1\VideoController;
 use App\Http\Controllers\Api\V1\QuizController;
 use App\Http\Controllers\Api\V1\AttemptController;
 use App\Http\Controllers\Api\V1\VideoProgressController;
+use App\Http\Controllers\Api\V1\Admin\RubricController;
 use App\Http\Controllers\Api\V1\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Api\V1\Admin\GradeLevelController as AdminGradeLevelController;
 use App\Http\Controllers\Api\V1\Admin\TopicController as AdminTopicController;
@@ -32,12 +32,13 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/oauth/google/link', [OAuthController::class, 'link'])->middleware('auth:sanctum');
 
     Route::post('/auth/refresh', [TokenController::class, 'refresh']);
+    Route::apiResource('grade-levels', GradeLevelController::class);
+
 
 
     Route::middleware('auth:sanctum')->group(function () {
 
         Route::apiResource('subjects', SubjectController::class);
-        Route::apiResource('grade-levels', GradeLevelController::class);
         Route::apiResource('topics', TopicController::class);
         Route::apiResource('videos', VideoController::class);
         Route::apiResource('quizzes', QuizController::class);
@@ -53,8 +54,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [TokenController::class, 'logout']);
         Route::get('/streak', [UserStreakController::class, 'show']);
 
-        Route::get('profile', [ProfileController::class,'show']);
-        Route::put('profile', [ProfileController::class,'update']);
+        Route::get('profile', [ProfileController::class, 'show']);
+        Route::put('profile', [ProfileController::class, 'update']);
 
         Route::get('points', [UserPointController::class, 'show']);
 

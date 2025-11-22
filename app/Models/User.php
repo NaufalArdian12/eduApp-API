@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'avatar_url',
         'role',
+        'is_admin' => 'boolean',
     ];
 
     /**
@@ -74,6 +75,11 @@ class User extends Authenticatable
     public function studentProfile()
     {
         return $this->hasOne(StudentProfile::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 
 }
