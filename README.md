@@ -1,90 +1,69 @@
-eduApp-API (Movato Backend)
+# 🎓 eduApp-API (Movato Backend)
 
-eduApp-API is the backend service powering Movato, an AI-augmented educational platform for elementary school students to learn mathematics interactively.
-This API serves both the Movato App (student-facing) and the Movato Admin Dashboard (management and content control). The system evaluates students' answers with an AI grader that classifies responses as understand, need revision, or not yet understand.
+**eduApp-API** is the robust backend service powering **Movato**, an AI-augmented educational platform designed to help elementary school students learn mathematics interactively.
 
-🚀 Features Overview
-Core features
+This API serves as the central hub for:
+* 📱 **Movato App:** The student-facing mobile/web application.
+* 🛡️ **Movato Admin Dashboard:** The management interface for content, users, and system logs.
 
-Authentication
+The core differentiator is the **AI Grading System**, which evaluates student answers in real-time, classifying them as *understood*, *needs revision*, or *not yet understood*.
 
-Email/password
+---
 
-Google OAuth
+## 🚀 Features Overview
 
-Laravel Sanctum token authentication
+### Core & Authentication
+* **Secure Auth:** Email/Password login & Google OAuth integration.
+* **Token Management:** Powered by Laravel Sanctum.
+* **RBAC:** Distinct roles for Students and Admins.
 
-User Management
+### 📚 Course & Content Management
+* **Curriculum:** structured hierarchy of Courses, Lessons, and Materials tailored for elementary math.
+* **Quiz Engine:** Support for quizzes with multiple question types, attempt tracking, and result analytics.
 
-Student accounts
+### 🤖 AI Grading System
+* **Smart Evaluation:** Prompt-based AI grader using OpenAI (GPT-4o-mini).
+* **Feedback:** Returns classification and detailed explanations for student answers.
 
-Admin roles & permissions
+### 🛡️ Admin Panel
+* **Built with FilamentPHP:** A sleek, intuitive dashboard for managing content, users, and system configurations.
+* **Monitoring:** System logs and AI configuration parameters.
 
-Profile management
+---
 
-Course & Content Management
+## 🛠 Tech Stack
 
-Courses, lessons, and learning materials tailored for elementary math
+| Component | Technology |
+| :--- | :--- |
+| **Framework** | Laravel 12 |
+| **Database** | Supabase (PostgreSQL) |
+| **Authentication** | Laravel Sanctum, Google OAuth |
+| **Admin Panel** | FilamentPHP |
+| **API Docs** | L5-Swagger (OpenAPI 3.0) |
+| **AI Integration** | OpenAI API |
+| **Deployment** | Laravel Cloud |
 
-Quiz Management
+---
 
-Quizzes, multiple question types, attempts & results
+## 📂 Project Architecture
 
-AI Grading System
+This project follows a structured **Service-Repository Pattern** to ensure scalability and testability.
 
-Prompt-based grader that returns classification and explanation
-
-Admin Panel
-
-FilamentPHP-based admin for content, user, and system management
-
-API Documentation
-
-L5-Swagger (OpenAPI)
-
-Publicly deployed (Laravel Cloud) but restricted access: only Movato clients and admin users
-
-🛠 Tech Stack
-
-Framework: Laravel 12
-
-Auth: Laravel Sanctum, Google OAuth
-
-Admin: FilamentPHP
-
-Database: Supabase (Postgres)
-
-Docs: L5-Swagger (Swagger)
-
-Pattern: Services, Repositories, Requests, Controllers (API versioned folders)
-
-📂 Project Structure (recommended / simplified)
-```
+```text
 app/
-  ├── Console/
-  ├── Exceptions/
-  ├── Http/
-  │     ├── Controllers/
-  │     │     ├── Api/
-  │     │     │    └── V1/                # API v1 controllers
-  │     │     └── Web/                    # Web / Filament controllers (if any)
-  │     ├── Middleware/
-  │     └── Requests/                     # Form Request validation classes
-  ├── Models/
-  ├── Repositories/                       # Data access layer (Repository pattern)
-  ├── Services/                           # Business logic, AI grading, integrations
-  ├── Policies/
-  └── Providers/
-
-config/
-database/
-routes/
-  ├── api.php                             # API routes (v1)
-  └── web.php
-
-resources/
-tests/
-```
+├── Http/
+│   ├── Controllers/
+│   │   ├── Api/
+│   │   │   └── V1/        # API Endpoints (Versioned)
+│   │   └── Web/           # Web/Filament Controllers
+│   ├── Middleware/
+│   └── Requests/          # FormRequests (Validation)
+├── Models/
+├── Repositories/          # Data Access Layer (DB Abstraction)
+├── Services/              # Business Logic (AI Grading, Integrations)
+└── Routes/
+    ├── api.php            # Routes prefixed with /api/v1
+    └── web.php
 
 Notes:
 
