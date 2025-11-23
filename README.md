@@ -18,7 +18,7 @@ The core differentiator is the **AI Grading System**, which evaluates student an
 * **RBAC:** Distinct roles for Students and Admins.
 
 ### 📚 Course & Content Management
-* **Curriculum:** structured hierarchy of Courses, Lessons, and Materials tailored for elementary math.
+* **Curriculum:** Structured hierarchy of Courses, Lessons, and Materials tailored for elementary math.
 * **Quiz Engine:** Support for quizzes with multiple question types, attempt tracking, and result analytics.
 
 ### 🤖 AI Grading System
@@ -64,211 +64,73 @@ app/
 └── Routes/
     ├── api.php            # Routes prefixed with /api/v1
     └── web.php
-
-Notes:
-
-Controllers/Api/V1/: All API endpoints for version 1 live here (keeps API versioning clear).
-Requests/: Request validation classes (FormRequests) for each endpoint.
-Repositories/: Encapsulate DB queries, external data sources, and abstract data access.
-Services/: Business logic like AI grading, integrations with Supabase, mail, etc.
-
-⚙️ Installation (Local Development)
-1. Clone
-```
-git clone https://github.com/NaufalArdian12/eduApp-API.git
-cd eduApp-API
 ```
 
-2. Install
-```
-composer install
-npm install        # only if there are JS assets to build
-```
+##🧭 Development Patterns
 
-3. Environment
-```
-cp .env.example .env
-php artisan key:generate
-```
+    Controllers: Kept thin. They delegate validation to Requests and logic to Services.
 
-4. Required .env variables (example)
+    Services: Handle complex business logic (e.g., GradingService.php) and external API calls.
+
+    Repositories: Isolate database queries to simplify testing and swapping data sources.
+
+    Versioning: All API routes are grouped under v1 to ensure future backward compatibility.
+
+---
+
+##⚙️ Installation & Setup
+
+Prerequisites
+
+    PHP 8.2+
+
+    Composer
+
+    PostgreSQL (or Supabase credentials)
+
+1. Clone the Repository
+   ```
+   git clone [https://github.com/NaufalArdian12/eduApp-API.git](https://github.com/NaufalArdian12/eduApp-API.git)
+   cd eduApp-API
+   ```
+2. Install Dependencies
+   ```
+   composer install
+   npm install  # If assets need building
+   ```
+3. Environment Configuration
+   Copy the example environment file and generate the app key
+   ```
+   cp .env.example .env
+   php artisan key:generate
+   ```
+Configure your .env variables:
 ```
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
+# Database (Supabase)
+DB_CONNECTION=pgsql
+DB_URL=postgres://user:password@host:port/database
+
+# API & Swagger
 APP_URL=http://localhost:8000
-AUTH_SEND_VERIFY=false
 L5_SWAGGER_CONST_HOST=http://localhost:8000
-L5_SWAGGER_OPEN_API_SPEC_VERSION=3.0.0
-OPENAI_API_KEY=
+
+# AI Configuration
+OPENAI_API_KEY=sk-proj-...
 OPENAI_MODEL=gpt-4o-mini
 
-APP_LOCALE=en
-APP_FALLBACK_LOCALE=en
-APP_FAKER_LOCALE=en_US
-
-APP_MAINTENANCE_DRIVER=file
-# APP_MAINTENANCE_STORE=database
-
-# PHP_CLI_SERVER_WORKERS=4
-BCRYPT_ROUNDS=12
-
-LOG_CHANNEL=stack
-LOG_STACK=single
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
-
-DB_CONNECTION=pgsql
-DB_URL=
-
-APP_URL=http://127.0.0.1:8000
-GOOGLE_CLIENT_ID=
-
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-SESSION_PATH=/
-SESSION_DOMAIN=null
-
-BROADCAST_CONNECTION=log
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-
-CACHE_STORE=database
-# CACHE_PREFIX=
-
-MEMCACHED_HOST=127.0.0.1
-
-REDIS_CLIENT=phpredis
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=log
-MAIL_SCHEME=null
-MAIL_HOST=127.0.0.1
-MAIL_PORT=2525
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-
-VITE_APP_NAME="${APP_NAME}"
+# OAuth
+GOOGLE_CLIENT_ID=your-client-id
 ```
 
-▶️ Run the app
-
-Start the app:
+4. Database Setup
+Run migrations and seed the database with initial data:
 ```
 php artisan migrate
-php artisan serve
-```
-Optional seed:
-```
 php artisan db:seed
 ```
 
-Swagger docs generate:
+5. Generate Documentation
+Generate the Swagger OpenAPI documentation:
 ```
 php artisan l5-swagger:generate
-# then visit /api/documentation
 ```
-
-🔐 Authentication Flow
-
-Supported:
-Email & password
-Google OAuth
-Sanctum tokens
-Example login response:
-```
-{
-  "token": "sanctum_personal_access_token_here",
-  "user": { /* user object */ }
-}
-```
-Use:
-```
-Authorization: Bearer <token>
-```
-
-🤖 AI Grading System
-
-Grading service (implemented under app/Services/) accepts:
-student answer / prompt
-canonical/expected answer
-acceptable alternatives
-Returns:
-```
-{
-  "result": "understand" | "revision_needed" | "not_understand",
-  "score": 0.0,          // optional numeric score
-  "explanation": "..."
-}
-```
-Place AI logic inside a Service (e.g., app/Services/GradingService.php) and keep Controllers thin — controllers should call Services/Repositories, and Requests for validation.
-
-
-🧭 API Versioning & Routing
-
-Routes in routes/api.php should be grouped with prefix /api/v1 and use controllers under App\Http\Controllers\Api\V1.
-Example:
-```
-Route::prefix('v1')->name('api.v1.')->group(function () {
-    Route::post('auth/login', [AuthController::class, 'login']);
-    // ...
-});
-```
-
-🛡 Admin Dashboard (Filament)
-
-Filament is used to manage:
-Courses, lessons, and quizzes
-User accounts and roles (permissions)
-AI configuration parameters
-System logs
-Admin UI path:
-```
-/admin
-```
-
-🌐 Deployment (Laravel Cloud)
-
-Application is public (deployed) but access-restricted to Movato clients + admin roles.
-Set .env variables in Laravel Cloud dashboard (DB, OAuth, Mail, SANCTUM_STATEFUL_DOMAINS).
-Use queues for email and AI grading jobs (supervisor/worker recommended).
-Use HTTPS and enable CORS only for trusted origins (Movato app domains and admin).
-
-
-✅ Recommended Development Patterns
-
-Controllers: keep thin — validate with Requests, delegate to Services.
-Requests: use Laravel Form Requests for input validation/authorization.
-Repositories: isolate DB logic to simplify testing.
-Services: implement AI integration, external API calls, and complex business rules.
-Versioning: keep API stable by using Api/V1 and introducing V2 when needed.
-
-🤝 Contribution
-
-Fork → create a branch → open PR.
-Add tests for new features.
-Update Swagger docs when endpoints change.
-
-
-📄 License
-
-MIT License (or change if desired).
-
-
-📬 Contact
-
-Author: Moch. Naufal Ardian Ramadhan (Naufal)
-Repo: https://github.com/NaufalArdian12/eduApp-API
