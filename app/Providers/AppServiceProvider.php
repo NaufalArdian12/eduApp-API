@@ -22,12 +22,18 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    { {
-            if ($this->app->environment('production') || env('APP_URL')) {
-                
-                URL::forceScheme('https');
-            }
+    public function boot()
+    {
+        if (app()->environment('production')) {
+
+            config([
+                'session.driver' => 'database',
+                'session.connection' => env('SESSION_CONNECTION', config('database.default')),
+                'session.table' => env('SESSION_TABLE', 'sessions'),
+                'session.domain' => '.eduapp-api-master-xgvx7r.laravel.cloud',
+                'session.secure' => true,
+                'session.same_site' => 'lax',
+            ]);
         }
     }
 
