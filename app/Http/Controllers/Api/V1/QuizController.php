@@ -64,3 +64,4 @@ class QuizController extends Controller
         return ApiResponse::ok($quiz);
     }
 }
+ 
