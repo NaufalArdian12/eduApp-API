@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+// --- 1. Import Namespace Filament (WAJIB) ---
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -9,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
@@ -25,7 +29,7 @@ class User extends Authenticatable
         'password',
         'avatar_url',
         'role',
-        'is_admin' => 'boolean',
+        'is_admin',
     ];
 
     /**
@@ -49,9 +53,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
-
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin();
+    }
     public function attempts(): HasMany
     {
         return $this->hasMany(Attempt::class);
@@ -72,7 +80,7 @@ class User extends Authenticatable
         return $this->hasOne(UserPoint::class);
     }
 
-    public function studentProfile()
+    public function studentProfile(): HasOne
     {
         return $this->hasOne(StudentProfile::class);
     }
@@ -81,5 +89,4 @@ class User extends Authenticatable
     {
         return (bool) $this->is_admin;
     }
-
 }
