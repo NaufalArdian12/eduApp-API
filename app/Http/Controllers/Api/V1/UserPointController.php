@@ -17,7 +17,9 @@ class UserPointController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-        $data = $this->points->getOrCreate($user->id);
+        $points = $this->points->getOrCreate($user->id);
+        $data = $points->toArray();
+        $data['name'] = $user->name ?? '';
 
         return ApiResponse::ok($data);
     }
