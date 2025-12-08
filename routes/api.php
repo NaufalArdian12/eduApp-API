@@ -43,6 +43,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('videos', VideoController::class);
         Route::apiResource('quizzes', QuizController::class);
 
+        Route::post('attempts/batch', [AttemptController::class, 'storeBatch']);
+
         Route::get('attempts', [AttemptController::class, 'index']);
         Route::post('attempts', [AttemptController::class, 'store']);
         Route::get('attempts/{attempt}', [AttemptController::class, 'show']);

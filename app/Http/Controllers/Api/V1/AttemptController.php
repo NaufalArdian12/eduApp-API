@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreAttemptRequest;
+use App\Http\Requests\Api\V1\StoreBatchAttemptRequest;
 use App\Models\Attempt;
 use App\Services\AttemptService;
 use App\Support\ApiResponse;
@@ -108,5 +109,24 @@ class AttemptController extends Controller
         $attempt->load('quiz.topic');
 
         return ApiResponse::ok($attempt);
+    }
+    public function storeBatch(StoreBatchAttemptRequest $request)
+    {
+        $user = $request->user();
+        $data = $request->validated();
+        $answers = $data['answers'];
+
+        $created = [];
+        foreach ($answers as $item) {
+            // reuse service (submitAttempt) — pastikan service bisa dipanggil berulang
+            $attempt = $this->attemptService->submitAttempt(
+                $user,
+                $item['quiz_id'],
+                $item['answer']
+            );
+            $created[] = $attempt;
+        }
+
+        return ApiResponse::ok($created, null, 201);
     }
 }
